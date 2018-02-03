@@ -12,11 +12,12 @@ class Pixel:
     def __init__(self, r, c):
         self.row = r
         self.col = c
-        self.board = e.create_rectangle(c*width, r*height, (c+1)*width, (r+1)*height, fill="white")
+        self.board = e.create_rectangle(c*width, r*height, (c+1)*width, (r+1)*height, fill="white", outline="")
 
     def filler(self):
         color = askcolor()
-        e.itemconfigure(self.board, fill=color)
+        color = color[-7:]
+        e.itemconfigure(self.board, fill=color[1])
 
 
 def startup():
@@ -26,8 +27,8 @@ def startup():
 
 
 def eyedrop(event):
-    i = event.x//width
-    j = event.y//height
+    j = event.x//width
+    i = event.y//height
     pxl[i][j].filler()
 
 e = Canvas(master, width=BOX, height=BOX, bg="white")
