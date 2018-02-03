@@ -1,30 +1,40 @@
 """
 This is the GUI file for BiTs
 """
-from tkinter import *
+from Tkinter import *
+from tkColorChooser import askcolor
 master = Tk()
-f = Frame(master, height=5, width=5)
-f.pack_propagate(0) # don't shrink
-f.pack()
+RC = 200
+BOX = 1000
 
 
-class pixel:
+class Pixel:
     def __init__(self, r, c):
         self.row = r
-        self.column = c
-        p = Button(f, relief="flat", bg="white")
-        p.grid(row = self.row, column = self.column)
-   # def  filler(self, ):
+        self.col = c
+        self.board = e.create_rectangle(c*width, r*height, (c+1)*width, (r+1)*height, fill="white")
 
-def startup(c):
-    for i in range(2):
-        c.append(i)
-        for j in range(2):
-            c[i] = pixel(i,j)
-        
-        
-        
+    def filler(self):
+        color = askcolor()
+        e.itemconfigure(self.board, fill=color)
 
-while True:
-    canvas = []
-    startup(canvas)
+
+def startup():
+    for i in range(RC):
+        for j in range(RC):
+            pxl[i][j] = Pixel(i, j)
+
+
+def eyedrop(event):
+    i = event.x//width
+    j = event.y//height
+    pxl[i][j].filler()
+
+e = Canvas(master, width=BOX, height=BOX, bg="white")
+e.bind("<Button-1>", eyedrop)
+e.pack()
+width = BOX / RC
+height = BOX / RC
+pxl = [[None for _ in range(RC)]for _ in range(RC)]
+startup()
+mainloop()
