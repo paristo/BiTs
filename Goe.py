@@ -169,6 +169,10 @@ class Stone:
     # this function checks the effect of a piece
     def effect(self):
         print "e"
+        
+    # this  function reverts a stone to an empty space
+    def destroy(self):
+        print "e"
 
 
 menu()
