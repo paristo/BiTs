@@ -1,6 +1,5 @@
 """
 this code simulate board game
-
 By Tomas Paris and Ben Goldman
 """
 import sys
@@ -10,7 +9,7 @@ master = Tk()
 
 def menu():
     # this is the welcome message
-    welcome = Label(master, text="Welcome to Goe!", font=("helvetica", 50))
+    welcome = Label(master, text="Welcome to Go!", font=("helvetica", 50))
     welcome.pack()
 
     # this is the new game button, it activates the start function
@@ -77,7 +76,7 @@ class Game:
         self.player.grid(row=0, column=0)
 
         # this chunk is junk don't worry about it
-        self.title = Message(self.table, text="Goe", font=("helvetica", 30), width=300, justify=CENTER)
+        self.title = Message(self.table, text="Go", font=("helvetica", 30), width=300, justify=CENTER)
         self.title.grid(row=0, column=1)
 
         # this chunk displays the total moves in the top right corner
@@ -109,7 +108,8 @@ class Game:
                 self.board.tag_bind(self.intersect[dot_x-1][dot_y-1], "<Button-1>", self.move)
 
         # this makes the pass button
-        self.turn_pass = Button(self.table, text="PASS", font=("helvetica", 20), command=self.play)
+        self.turn_pass = Button(self.table, text="PASS", font=("helvetica", 20), command=self.pas)
+        self.last_pas = None
         self.turn_pass.grid(row=2, column=0)
 
         # this makes the surrender button
@@ -117,7 +117,7 @@ class Game:
         self.surrend_butn.grid(row=2, column=1)
 
         # this makes the end game button
-        self.stop_game = Button(self.table, text="PROPOSE END", font=("helvetica", 20), command=self.endgame)
+        self.stop_game = Button(self.table, text="PROPOSE END", font=("helvetica", 20), command=self.want_end)
         self.stop_game.grid(row=2, column=2)
 
     # this function places a stone
@@ -146,12 +146,21 @@ class Game:
         self.playermove.set(self.turn)
         self.table.config(cursor=self.hand)
 
+    # this function skips the players turn, or ends the game after two consecutive passes
+    def pas(self):
+        if (self.total-1) == self.last_pas:
+            endgame(self.places)
+        self.last_pas = self.total
+        self.play()
+
     # this function ends the game, whoever pushes it loses
     def surrender(self):
+        self.play()
         print "e"
 
     # this function proposes to end the game
-    def endgame(self):
+    def want_end(self):
+        self.play()
         print "e"
 
 
@@ -166,13 +175,18 @@ class Stone:
     def life(self):
         print "e"
 
-    # this function checks the effect of a piece
+    # this function checks the effect of a piece on other nearby pieces
     def effect(self):
         print "e"
-        
+
     # this  function reverts a stone to an empty space
     def destroy(self):
         print "e"
+
+
+# this function ends the game, calculates scores, and displays the winner
+def endgame(stones):
+    print "e"
 
 
 menu()
