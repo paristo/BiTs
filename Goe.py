@@ -2,7 +2,6 @@
 this code simulate board game
 By Tomas Paris and Ben Goldman
 """
-import sys
 from Tkinter import *
 master = Tk()
 
