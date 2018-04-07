@@ -237,7 +237,6 @@ class Game:
 
     # this function proposes to end the game
     def want_end(self):
-        self.play()
         # this chunk displays the request
         self.request = self.board.create_rectangle(150, 250, 850, 650, fill="grey", outline="white")
         self.reqtitle = self.board.create_text(500, 350, text=self.turn + " requests end!", font=("helvetica", 50), width=800)
@@ -249,6 +248,7 @@ class Game:
         self.board.tag_bind(self.yesbutn, "<Button-1>", self.accept)
         self.board.tag_bind(self.reqyes, "<Button-1>", self.accept)
         self.board.tag_bind(self.reqno, "<Button-1>", self.deny)
+        self.play()
         self.freeze()
 
     def findscore(self):
