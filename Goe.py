@@ -74,7 +74,7 @@ class Game:
         self.player = Message(self.table, textvariable=self.playermove, font=("helvetica", 20), width=300, justify=LEFT)
         self.player.grid(row=0, column=0)
 
-        # this chunk is junk don't worry about it
+        # this chunk is junk don't worry about it (it displays some text above the board)
         self.title = Message(self.table, text="Go", font=("helvetica", 30), width=300, justify=CENTER)
         self.title.grid(row=0, column=1)
 
@@ -106,7 +106,9 @@ class Game:
                                                                           outline="")
         self.unfreeze()
 
+    # this function adds buttons
     def unfreeze(self):
+        # this makes each stone a button
         for dot_x in range(1, 10):
             for dot_y in range(1, 10):
                 self.board.tag_bind(self.intersect[dot_x-1][dot_y-1], "<Button-1>", self.move)
@@ -148,7 +150,7 @@ class Game:
 
         # this chunk increases the total moves, and deletes the pass message, if present
         self.total += 1
-        if (self.total - 2) == self.last_pas:
+        if (self.total - 1) == self.last_pas:
             self.board.delete(self.pasmesg)
 
         # this chunk updates the displays on the board
@@ -158,11 +160,11 @@ class Game:
 
     # this function skips the players turn, or ends the game after two consecutive passes
     def pas(self):
-        if (self.total-1) == self.last_pas:
+        if self.total == self.last_pas:
             self.findscore()
         else:
-            self.last_pas = self.total
-            self.pasmesg = self.board.create_text(500, 50, text=self.turn+" passed!", font=("helvetica", 25), width=300)
+            self.last_pas = self.total + 1
+            self.pasmesg = self.board.create_text(500, 35, text=self.turn+" passed!", font=("helvetica", 25), width=300)
             self.play()
 
     # this function ends the game, whoever pushes it loses
@@ -185,7 +187,7 @@ class Game:
         self.surrend_butn.destroy()
         self.stop_game.destroy()
 
-        # this chunk freezes the board and displays up the score
+        # this chunk freezes the board and displays the score
         for dot_x in range(1, 10):
             for dot_y in range(1, 10):
                 self.board.tag_unbind(self.intersect[dot_x - 1][dot_y - 1], "<Button-1>")
@@ -253,6 +255,8 @@ class Game:
 
     def findscore(self):
         print "e"
+        self.freeze()
+        self.endgame()
 
 
 class Stone:
@@ -275,7 +279,7 @@ class Stone:
         print "e"
 
 class Shape:
-    
+
     def __init__(self):
         print "e"
 
