@@ -4,27 +4,40 @@ By Tomas Paris and Ben Goldman
 """
 from Tkinter import *
 master = Tk()
+master.geometry('500x300')
+master.title("menu")
+master.config(bg="white")
+master.iconbitmap("menu.ico")
+master.tk.call("tk", "scaling", 1)
 
 
 def menu():
     # this is the welcome message
-    welcome = Label(master, text="Welcome to Go!", font=("helvetica", 50))
+    welcome = Label(master, text="Welcome to Go!", font=("helvetica", 50), bg="white")
     welcome.pack()
 
+    entry = Frame(height=50, width=300, bg="white")
+    entry.pack(expand=1)
+
     # this is the new game button, it activates the start function
-    new = Button(master, text="NEW GAME", font=("helvetica", 30), command=start)
+    new = Button(entry, text="NEW GAME", font=("helvetica", 30), bd=5, command=start)
     new.pack(fill=BOTH, expand=1)
+    new.config(cursor="hand2")
 
     # this is the rules button, it activates the explain function
-    rules = Button(master, text="RULES", font=("helvetica", 30), command=explain)
-    rules.pack(fill=BOTH, expand=1)
+    rules = Button(entry, text="RULES", font=("helvetica", 30), bd=5, command=explain)
+    rules.pack(fill=BOTH, expand=1, pady=20)
+    rules.config(cursor="hand2")
 
 
 # this function is junk, don't worry about it (it opens a window and displays the rules)
 def explain():
     instructions = Toplevel()
     instructions.title("Instructions")
+    instructions.config(bg="white")
+    instructions.iconbitmap("book.ico")
     instructions.grid()
+    instructions.tk.call("tk", "scaling", 1)
 
     rule1 = "1. Black moves first"
     rule2 = "2. Empty spaces are called Breaths"
@@ -35,21 +48,21 @@ def explain():
     rule6 = "6. The final score is the total land controlled by a color minus the number of dead stones of that color"
     rule7 = "7. The game ends when both sides agree to end the game, when one side surrenders, or after two consecutive passes"
 
-    rule_1 = Message(instructions, text=rule1, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_1 = Message(instructions, text=rule1, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_1.grid(row=0, column=0)
-    rule_2 = Message(instructions, text=rule2, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_2 = Message(instructions, text=rule2, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_2.grid(row=1, column=0)
-    rule_3 = Message(instructions, text=rule3, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_3 = Message(instructions, text=rule3, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_3.grid(row=2, column=0)
-    rule_4 = Message(instructions, text=rule4, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_4 = Message(instructions, text=rule4, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_4.grid(row=3, column=0)
-    rule_ko = Message(instructions, text=korule, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_ko = Message(instructions, text=korule, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_ko.grid(row=4, column=0)
-    rule_5 = Message(instructions, text=rule5, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_5 = Message(instructions, text=rule5, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_5.grid(row=0, rowspan=2, column=1)
-    rule_6 = Message(instructions, text=rule6, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_6 = Message(instructions, text=rule6, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_6.grid(row=2, rowspan=2, column=1)
-    rule_7 = Message(instructions, text=rule7, font=("helvetica", 15), width=200, justify=LEFT)
+    rule_7 = Message(instructions, text=rule7, font=("helvetica", 15), width=200, justify=LEFT, bg="white")
     rule_7.grid(row=4, rowspan=2, column=1)
 
 
@@ -63,30 +76,31 @@ class Game:
     def __init__(self):
         self.table = Toplevel()                 # this creates a new window
         self.table.title("Tabletop")
+        self.table.config(bg="white")
+        self.table.iconbitmap("board.ico")
         self.table.grid()
-        self.hand = "left_ptr"
-        self.table.config(cursor=self.hand)     # this sets a new cursor for the window
+        self.table.tk.call("tk", "scaling", 1)
 
         # this chunk displays the current player in the top left corner
         self.turn = "Black"
         self.playermove = StringVar()
         self.playermove.set(self.turn+"'s Turn:")
-        self.player = Message(self.table, textvariable=self.playermove, font=("helvetica", 20), width=300, justify=LEFT)
+        self.player = Message(self.table, textvariable=self.playermove, font=("helvetica", 20), width=300, justify=LEFT, bg="white")
         self.player.grid(row=0, column=0)
 
         # this chunk is junk don't worry about it (it displays some text above the board)
-        self.title = Message(self.table, text="Go", font=("helvetica", 30), width=300, justify=CENTER)
+        self.title = Message(self.table, text="Go", font=("helvetica", 30), width=300, justify=CENTER, bg="white")
         self.title.grid(row=0, column=1)
 
         # this chunk displays the total moves in the top right corner
         self.total = 0
         self.totalmove = StringVar()
         self.totalmove.set("Total Moves: " + str(self.total))
-        self.counter = Message(self.table, textvariable=self.totalmove, font=("helvetica", 20), width=300, justify=RIGHT)
+        self.counter = Message(self.table, textvariable=self.totalmove, font=("helvetica", 20), width=300, justify=RIGHT, bg="white")
         self.counter.grid(row=0, column=2)
 
         # this creates the board
-        self.board = Canvas(self.table, width=1000, height=1000, bg="#DEB887")
+        self.board = Canvas(self.table, width=1000, height=1000, bg="#DEB887", bd=5, relief=RAISED)
         self.board.grid(row=1, columnspan=3)
 
         # this creates the grid of lines on the board
@@ -113,18 +127,23 @@ class Game:
             for dot_y in range(1, 10):
                 self.board.tag_bind(self.intersect[dot_x-1][dot_y-1], "<Button-1>", self.move)
 
+        self.board.config(cursor="tcross")  # this sets a new cursor for the board
+
         # this makes the pass button
-        self.turn_pass = Button(self.table, text="PASS", font=("helvetica", 20), command=self.pas)
+        self.turn_pass = Button(self.table, text="PASS", font=("helvetica", 20), bd=5, command=self.pas)
         self.last_pas = None
         self.turn_pass.grid(row=2, column=0)
+        self.turn_pass.config(cursor="hand2")
 
         # this makes the surrender button
-        self.surrend_butn = Button(self.table, text="SURRENDER", font=("helvetica", 20), command=self.surrender)
+        self.surrend_butn = Button(self.table, text="SURRENDER", font=("helvetica", 20), bd=5, command=self.surrender)
         self.surrend_butn.grid(row=2, column=1)
+        self.surrend_butn.config(cursor="hand2")
 
         # this makes the end game button
-        self.stop_game = Button(self.table, text="PROPOSE END", font=("helvetica", 20), command=self.want_end)
+        self.stop_game = Button(self.table, text="PROPOSE END", font=("helvetica", 20), bd=5, command=self.want_end)
         self.stop_game.grid(row=2, column=2)
+        self.stop_game.config(cursor="hand2")
 
     # this function places a stone
     def move(self, event):
@@ -143,10 +162,8 @@ class Game:
     def play(self):
         if self.turn == "Black":
             self.turn = "White"
-            self.hand = "right_ptr"
         else:
             self.turn = "Black"
-            self.hand = "left_ptr"
 
         # this chunk increases the total moves, and deletes the pass message, if present
         self.total += 1
@@ -156,7 +173,6 @@ class Game:
         # this chunk updates the displays on the board
         self.totalmove.set("Total Moves: " + str(self.total))
         self.playermove.set(self.turn+"'s Turn:")
-        self.table.config(cursor=self.hand)
 
     # this function skips the players turn, or ends the game after two consecutive passes
     def pas(self):
@@ -187,6 +203,8 @@ class Game:
         self.surrend_butn.destroy()
         self.stop_game.destroy()
 
+        self.board.config(cursor="arrow")
+
         # this chunk freezes the board and displays the score
         for dot_x in range(1, 10):
             for dot_y in range(1, 10):
@@ -194,15 +212,18 @@ class Game:
 
     def endgame(self):
         # this adds a button to bring up the score
-        self.popbutn = Button(self.table, text="View Score", font=("helvetica", 20), command=self.finalpopup)
+        self.popbutn = Button(self.table, text="View Score", font=("helvetica", 20), bd=5, command=self.finalpopup)
         self.popbutn.grid(row=2, column=1)
+        self.popbutn.config(cursor="hand2")
         self.finalpopup()
 
     # this function shows the final score
     def finalpopup(self):
         popup = Toplevel()
         popup.title("Score")
+        popup.iconbitmap("score.ico")
         popup.grid()
+        popup.tk.call("tk", "scaling", 1)
 
         # this chunk displays the popup text
         popwin = Message(popup, text=self.winner + " Wins!", font=("helvetica", 80), width=600, justify=CENTER)
@@ -217,39 +238,33 @@ class Game:
         finalwhite.grid(row=2, column=1)
 
     # this function denies a request for endgame
-    def deny(self, event):
+    def deny(self):
         self.unfreeze()
         self.board.delete(self.request)
         self.board.delete(self.reqtitle)
-        self.board.delete(self.yesbutn)
-        self.board.delete(self.nobutn)
-        self.board.delete(self.reqyes)
-        self.board.delete(self.reqno)
+        self.ybut.destroy()
+        self.nbut.destroy()
 
     # this function accepts a request for endgame
-    def accept(self, event):
+    def accept(self):
         self.unfreeze()
         self.board.delete(self.request)
         self.board.delete(self.reqtitle)
-        self.board.delete(self.yesbutn)
-        self.board.delete(self.nobutn)
-        self.board.delete(self.reqyes)
-        self.board.delete(self.reqno)
+        self.ybut.destroy()
+        self.nbut.destroy()
         self.findscore()
 
     # this function proposes to end the game
     def want_end(self):
         # this chunk displays the request
-        self.request = self.board.create_rectangle(150, 250, 850, 650, fill="grey", outline="white")
+        self.request = self.board.create_rectangle(200, 250, 800, 650, fill="grey", outline="white")
         self.reqtitle = self.board.create_text(500, 350, text=self.turn + " requests end!", font=("helvetica", 50), width=800)
-        self.yesbutn = self.board.create_rectangle(220, 450, 380, 550, fill="darkgrey")
-        self.nobutn = self.board.create_rectangle(620, 450, 780, 550, fill="darkgrey")
-        self.reqyes = self.board.create_text(300, 500, text="YES", font=("helvetica", 50), width=200)
-        self.reqno = self.board.create_text(700, 500, text="NO", font=("helvetica", 50), width=200)
-        self.board.tag_bind(self.nobutn, "<Button-1>", self.deny)
-        self.board.tag_bind(self.yesbutn, "<Button-1>", self.accept)
-        self.board.tag_bind(self.reqyes, "<Button-1>", self.accept)
-        self.board.tag_bind(self.reqno, "<Button-1>", self.deny)
+        self.ybut = Button(self.board, text="YES", font=("helvetica", 40), bd=5, command=self.accept)
+        self.nbut = Button(self.board, text="NO", font=("helvetica", 40), bd=5, command=self.deny)
+        self.ybut.place(relx=0.325, rely=0.447, x=.5, y=.5)
+        self.ybut.config(cursor="hand2")
+        self.nbut.place(relx=0.535, rely=0.447, x=.5, y=.5)
+        self.nbut.config(cursor="hand2")
         self.play()
         self.freeze()
 
