@@ -78,8 +78,8 @@ class Game:
         self.table.title("Tabletop")
         self.table.config(bg="white")
         self.table.iconbitmap("board.ico")
-        self.table.grid()
         self.table.tk.call("tk", "scaling", 1)
+        self.table.state('zoomed')
 
         # this chunk displays the current player in the top left corner
         self.turn = "Black"
