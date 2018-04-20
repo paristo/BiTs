@@ -97,16 +97,13 @@ class Game:
         self.blackbumber = Canvas(window, width=350, height=900, bg="grey", bd=5, relief=RAISED)
         self.blackbumber.place(relx=0.11, rely=0.5, anchor=CENTER)
 
-        self.blackside = self.blackbumber.create_text(160, 80, text="Black:", font=("helvetica", 80), width=300)
+        self.blackbumber.create_text(160, 80, text="Black:", font=("helvetica", 80), width=300)
+        self.blackbumber.create_text(180, 250, text="Pieces Captured:", font=("helvetica", 40), width=400)
+        self.blackbumber.create_text(90, 600, text='Score:', font=("helvetica", 40), width=300)
 
         self.turn = "Black"
         self.blackstate = "(Moving)"
         self.currentblack = self.blackbumber.create_text(130, 140, text=self.blackstate, font=("helvetica", 40), width=300)
-
-
-        self.blackcapt = self.blackbumber.create_text(180, 250, text="Pieces Captured:", font=("helvetica", 40), width=400)
-
-        self.blackscoremesg = self.blackbumber.create_text(90, 600, text='Score:', font=("helvetica", 40), width=300)
 
         self.blackscore = "TBD"
         self.blackscored = self.blackbumber.create_text(170, 760, text=self.blackscore, font=("helvetica", 120), width=300)
@@ -144,14 +141,12 @@ class Game:
         self.whitebumber = Canvas(window, width=350, height=900, bg="grey", bd=5, relief=RAISED)
         self.whitebumber.place(relx=0.89, rely=0.5, anchor=CENTER)
 
-        self.whiteside = self.whitebumber.create_text(160, 80, text="White:", font=("helvetica", 80), width=300)
+        self.whitebumber.create_text(160, 80, text="White:", font=("helvetica", 80), width=300)
+        self.whitebumber.create_text(180, 250, text="Pieces Captured:", font=("helvetica", 40), width=400)
+        self.whitebumber.create_text(90, 600, text='Score:', font=("helvetica", 40), width=300)
 
         self.whitestate = "(Waiting)"
         self.currentwhite = self.whitebumber.create_text(130, 140, text=self.whitestate, font=("helvetica", 40), width=300)
-
-        self.whitecapt = self.whitebumber.create_text(180, 250, text="Pieces Captured:", font=("helvetica", 40), width=400)
-
-        self.whitescoremesg = self.whitebumber.create_text(90, 600, text='Score:', font=("helvetica", 40), width=300)
 
         self.whitescore = "TBD"
         self.whitescored = self.whitebumber.create_text(170, 760, text=self.whitescore, font=("helvetica", 120), width=300)
@@ -190,16 +185,20 @@ class Game:
         # this chunk displays the request
         self.menuback = Canvas(window, width=400, height=600, bg="grey", bd=5, relief=RAISED)
         self.menuback.place(relx=0.5, rely=0.5, anchor=CENTER)
-        self.reqtitle = self.menuback.create_text(200, 100, text="MENU", font=("helvetica", 100), width=800, justify=CENTER)
-        self.newgame = Button(self.menuback, text="New Game", font=("helvetica", 40), bd=5, width=9, command=start)
-        self.newgame.place(relx=0.5, rely=0.4, anchor=CENTER)
-        self.newgame.config(cursor="hand2")
-        self.rulebut = Button(self.menuback, text="Rules", font=("helvetica", 40), bd=5, width=9, command=self.rulepopup)
-        self.rulebut.place(relx=0.5, rely=0.6, anchor=CENTER)
-        self.rulebut.config(cursor="hand2")
-        self.exitbut = Button(self.menuback, text="Close", font=("helvetica", 50), bd=5, width=11, command=self.closemenu)
-        self.exitbut.place(relx=0.5, rely=0.85, anchor=CENTER)
-        self.exitbut.config(cursor="hand2")
+        self.menuback.create_text(200, 100, text="MENU", font=("helvetica", 100), width=800, justify=CENTER)
+
+        newgame = Button(self.menuback, text="New Game", font=("helvetica", 40), bd=5, width=9, command=start)
+        newgame.place(relx=0.5, rely=0.4, anchor=CENTER)
+        newgame.config(cursor="hand2")
+
+        rulebut = Button(self.menuback, text="Rules", font=("helvetica", 40), bd=5, width=9, command=self.rulepopup)
+        rulebut.place(relx=0.5, rely=0.6, anchor=CENTER)
+        rulebut.config(cursor="hand2")
+
+        exitbut = Button(self.menuback, text="Close", font=("helvetica", 50), bd=5, width=11, command=self.closemenu)
+        exitbut.place(relx=0.5, rely=0.85, anchor=CENTER)
+        exitbut.config(cursor="hand2")
+
         self.freeze()
         attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, self.menuback]
         mainlist.extend(attributes)
@@ -225,7 +224,7 @@ class Game:
         self.ruleback.create_text(450, 320, text=rule6, font=("helvetica", 25), width=250)
         self.ruleback.create_text(450, 520, text=rule7, font=("helvetica", 25), width=250)
 
-        norule = Button(self.ruleback, text="Close", font=("helvetica", 40), bd=5, width=16, height=2, command=self.closerule, cursor="hand2")
+        norule = Button(self.ruleback, text="Close", font=("helvetica", 40), bd=5, width=16, height=1, command=self.closerule, cursor="hand2")
         norule.place(relx=0.5, rely=0.88, anchor=CENTER)
 
     # this function places a stone
@@ -311,11 +310,11 @@ class Game:
         self.blackbumber.itemconfig(self.blackscored, text=self.blackscore)
         self.whitebumber.itemconfig(self.whitescored, text=self.whitescore)
 
-        self.newgame = Button(window, text="New Game", font=("helvetica", 20), bd=5, width=9, command=start)
-        self.newgame.place(relx=0.5, rely=0.965, anchor=CENTER)
-        self.newgame.config(cursor="hand2")
+        newgame = Button(window, text="New Game", font=("helvetica", 20), bd=5, width=9, command=start)
+        newgame.place(relx=0.5, rely=0.965, anchor=CENTER)
+        newgame.config(cursor="hand2")
 
-        attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, self.newgame]
+        attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, newgame]
         mainlist.extend(attributes)
 
     # this function denies a request for endgame
@@ -334,13 +333,14 @@ class Game:
         # this chunk displays the request
         self.request = Canvas(window, width=600, height=400, bg="grey", bd=5, relief=RAISED)
         self.request.place(relx=0.5, rely=0.5, anchor=CENTER)
-        self.reqtitle = self.request.create_text(300, 100, text=self.turn + " requests end!", font=("helvetica", 50), width=800, justify=CENTER)
-        self.ybut = Button(self.request, text="YES", font=("helvetica", 40), bd=5, width=9, command=self.accept)
-        self.nbut = Button(self.request, text="NO", font=("helvetica", 40), bd=5, width=9, command=self.deny)
-        self.ybut.place(relx=0.3, rely=0.6, anchor=CENTER)
-        self.ybut.config(cursor="hand2")
-        self.nbut.place(relx=0.7, rely=0.6, anchor=CENTER)
-        self.nbut.config(cursor="hand2")
+        self.request.create_text(300, 100, text=self.turn + " requests end!", font=("helvetica", 50), width=800, justify=CENTER)
+
+        ybut = Button(self.request, text="YES", font=("helvetica", 40), bd=5, width=9, command=self.accept)
+        nbut = Button(self.request, text="NO", font=("helvetica", 40), bd=5, width=9, command=self.deny)
+        ybut.place(relx=0.3, rely=0.6, anchor=CENTER)
+        ybut.config(cursor="hand2")
+        nbut.place(relx=0.7, rely=0.6, anchor=CENTER)
+        nbut.config(cursor="hand2")
         self.play()
         self.freeze()
 
