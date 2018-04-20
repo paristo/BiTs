@@ -121,8 +121,13 @@ class Game:
 
         # this creates the grid of lines on the board
         for line in range(1, 10):
-            self.board.create_line(100, (100 * line), 900, (100 * line))
-            self.board.create_line((100 * line), 100, (100 * line), 900)
+            self.board.create_line(100, (100 * line), 900, (100 * line), width=2)
+            self.board.create_line((100 * line), 100, (100 * line), 900, width=2)
+        self.board.create_polygon(300, 280, 320, 300, 300, 320, 280, 300, fill="black")
+        self.board.create_polygon(700, 280, 720, 300, 700, 320, 680, 300, fill="black")
+        self.board.create_polygon(300, 680, 320, 700, 300, 720, 280, 700, fill="black")
+        self.board.create_polygon(700, 680, 720, 700, 700, 720, 680, 700, fill="black")
+        self.board.create_polygon(500, 480, 520, 500, 500, 520, 480, 500, fill="black")
 
         # this array represents the places for stones
         self.places = [[None for x in range(9)] for x in range(9)]
