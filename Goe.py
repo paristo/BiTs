@@ -143,10 +143,10 @@ class Game:
         self.board.place(relx=0.5, rely=0.5, anchor=CENTER)
 
         # this creates the grid of lines on the board
-        G = int(BS//10)     # G stands for grid
+        G = BS/10.0     # G stands for grid
         for line in range(1, 10):
-            self.board.create_line(G, (G * line), BS-G, (G * line), width=2)
-            self.board.create_line((G * line), G, (G * line), BS-G, width=2)
+            self.board.create_line(G, (G * line), 9*G, (G * line), width=2)
+            self.board.create_line((G * line), G, (G * line), 9*G, width=2)
         UD = 3*G    # UD stands for upper diamond
         LD = 7*G    # LD stands for lower diamond
         DS = int(BS//50)    # DS stands for diamond size
@@ -294,7 +294,7 @@ class Game:
         else:
             self.last_pas = self.total + 1
             BS = self.BS
-            self.pasmesg = self.board.create_text(int(BS//2), int(BS//20), text=self.turn+" passed!", font=("helvetica", int(W//72.9)), width=int(W//6))
+            self.pasmesg = self.board.create_text(int(BS//2), int(BS//25), text=self.turn+" passed!", font=("helvetica", int(W//72.9)), width=int(W//6))
             self.play()
 
     # this function ends the game, whoever pushes it loses
