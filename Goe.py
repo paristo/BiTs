@@ -1,30 +1,30 @@
 """
 this code simulate board game
 By Tomas Paris and Ben Goldman
-    Tomas wrote the graphic interface (the Game class), including the code which calculates final score
+    Tomas wrote the graphic interface (the Game class), including the code which calculates final score, and the mainmenu, explain, close, and start functions
     Ben wrote the game logic (the Stone and Shape class)
 
 ## DOC TESTS ##
-    because this program cannot accept normal doctest inputs, this section will simply be a list of commands
-    for the user to test on their own
+    because this program cannot accept normal doctest inputs, this section will simply be a list of commands for the user to test on their own
+NOTE: try performing each doctest onn both colors
 
->> encircle a stone of each color
+>> encircle a stone of opposite color
 the encircled stone should dissapear, and a captured piece should be added
     example:
 _ X _       _ X _
 X O X  -->  X _ X
 _ X _       _ X _
 
->> open the menu and start a new game
+>> aftre playing a few moves, open the menu and start a new game
 the board, captured pieces, score, and total moves should reset
 
 >> press the surrender button
-the game should end, and the other player should win by default
+the game should end, and the other player should win by default, regardless of potential score
 
 >> pass a move two times in a row
 the game should end, and a final score should be calculated and displayed
 
->> request an end to game
+>> request an end to the game
 press no, and the game should continue; press yes, and the game should end and the score should be displayed
 
 >> surround land with one color, then surround one node of that circle with another color
@@ -52,17 +52,21 @@ _ _ _ _ _       _ O O O _       _ O O O _
 """
 from Tkinter import *
 
+# the following chunk of code was written by Tomas
+#
+#
     # initializes the window, and customizes its features
 master = Tk()
-master.geometry('500x300')
 master.title("Go (game)")
 master.config(bg="white")
-master.iconbitmap("board.ico")
+master.iconbitmap("board.ico")      # board.ico should be a file in the same directory as this code
 master.call("tk", "scaling", 1)
 master.state('zoomed')      # opens the window in fullscreen, only works on windows, not mac
     # creates height and width values based off of the screen being used
 H = master.winfo_screenheight() - (master.winfo_screenheight() * 0.1)
 W = master.winfo_screenwidth() - (master.winfo_screenwidth() * 0.02)
+master.geometry('%dx%d+0+%d' % (W, H, H*.05))       # opens the window almost fullscreen, on mac
+    # initalizes a frame with a fixed size and position for all the other objects to be displayed on
 window = Frame(height=H, width=W, bg="white")
 window.place(relx=0.5, rely=0.5, anchor=CENTER)
     # text of all the rules for Go
@@ -78,7 +82,7 @@ rule7 = "7. The game ends when both sides agree to end the game, when one side s
 mainlist = []
 
 
-# displays the main menu; the code for this Class was written by Tomas
+# displays the main menu; written by Tomas
 def mainmenu():
     close()     # clears the display
         # draws a backdrop for the main menu
@@ -97,7 +101,7 @@ def mainmenu():
     attributes = [backdrop, welcome, new, rules]
     mainlist.extend(attributes)
 
-#clears the display
+#clears the display; by Tommas
 def close():
         #destroys every item in mainlist, clearing the display for new objects
     for item in mainlist:
@@ -105,7 +109,7 @@ def close():
     del mainlist[:]
 
 
-# opens a window and displays the rules
+# opens a window and displays the rules; by Tomas
 def explain():
     close()     # clears the display
         # displays all the text of the rules
@@ -135,12 +139,13 @@ def explain():
     mainlist.extend(attributes)
 
 
-# new game button is directed here to open up the Game class, since buttons can't directly open a class
+# new game button is directed here to open up the Game class, since buttons can't directly open a class; by Tomas
 def start():
     close()     # clears the display
     gameplay = Game()
 
 
+# a datatype for the game display interface and movement; by Tomas
 class Game:
 
     def __init__(self):
@@ -155,7 +160,7 @@ class Game:
         self.blackbumber.create_text(int(BW//1.9), int(BH//3.6), text="Pieces Captured:", font=("helvetica", int(W//45.6)), width=int(W//4.5))
         self.blackbumber.create_text(int(BW//3.8), int(BH//1.5), text='Score:', font=("helvetica", int(W//45.6)), width=int(W//6))
             # displays the state of black side
-        self.turn = "Black"
+        self.turn = "Black"     # used as an easy way to check whose turn it is
         self.blackstate = "(Moving)"
         self.currentblack = self.blackbumber.create_text(int(BW//2.6), int(BH//6.4), text=self.blackstate, font=("helvetica", int(W//45.6)), width=int(W//6))
             # displays the score of black side
@@ -182,7 +187,7 @@ class Game:
         # fills the center of the window
             # displays the total moves played, using necessary tkinter variable types
         self.total = 0
-        self.totalmove = StringVar()    # tkinter Message() objects need StringVar() to update display while still running
+        self.totalmove = StringVar()    # tkinter Message() objects need StringVar() in order to update display while still running
         self.totalmove.set("Total Moves: " + str(self.total))
         self.counter = Message(window, textvariable=self.totalmove, font=("helvetica", int(W//45.6)), width=int(W//6), justify=RIGHT, bg="white")
         self.counter.place(relx=0.5, rely=0.04, anchor=CENTER)
@@ -221,7 +226,7 @@ class Game:
 
 # places a stone
     def move(self, event):
-            # grabs the location of the mouse when it was clicked, and through fancy division finds the stone locations it was above
+            # grabs the location of the mouse when it was clicked, and through fancy division finds the stone location that was clicked
         BS = self.BS
         x = (event.x - int(BS//20)) // int(BS//10)
         y = (event.y - int(BS//20)) // int(BS//10)
@@ -264,21 +269,17 @@ class Game:
             # sets a new cursor for the board
         self.board.config(cursor="tcross")
             # makes the menu button
-        self.menubut = Button(window, text="OPTIONS", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.menu)
+        self.menubut = Button(window, text="OPTIONS", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.menu, cursor="hand2")
         self.menubut.place(relx=0.92, rely=0.05, anchor=CENTER)
-        self.menubut.config(cursor="hand2")
             # makes the pass button
-        self.turn_pass = Button(window, text="PASS", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.pas)
+        self.turn_pass = Button(window, text="PASS", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.pas, cursor="hand2")
         self.turn_pass.place(relx=0.38, rely=0.965, anchor=CENTER)
-        self.turn_pass.config(cursor="hand2")
             # makes the surrender button
-        self.surrend_butn = Button(window, text="SURRENDER", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.surrender)
+        self.surrend_butn = Button(window, text="SURRENDER", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.surrender, cursor="hand2")
         self.surrend_butn.place(relx=0.5, rely=0.965, anchor=CENTER)
-        self.surrend_butn.config(cursor="hand2")
             # makes the end game button
-        self.stop_game = Button(window, text="PROPOSE END", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.want_end)
+        self.stop_game = Button(window, text="PROPOSE END", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.want_end, cursor="hand2")
         self.stop_game.place(relx=0.62, rely=0.965, anchor=CENTER)
-        self.stop_game.config(cursor="hand2")
 
 # deletes all the buttons
     def freeze(self):
@@ -303,20 +304,17 @@ class Game:
         self.menuback.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.menuback.create_text(int(MW//2), int(MH//6), text="MENU", font=("helvetica", int(W//18.2)), width=int(W//2.2), justify=CENTER)
             # makes the new game button
-        newgame = Button(self.menuback, text="New Game", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=start)
+        newgame = Button(self.menuback, text="New Game", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=start, cursor="hand2")
         newgame.place(relx=0.5, rely=0.4, anchor=CENTER)
-        newgame.config(cursor="hand2")
             # makes the rules button
-        rulebut = Button(self.menuback, text="Rules", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.rulepopup)
+        rulebut = Button(self.menuback, text="Rules", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.rulepopup, cursor="hand2")
         rulebut.place(relx=0.5, rely=0.6, anchor=CENTER)
-        rulebut.config(cursor="hand2")
             # makes the close button
-        exitbut = Button(self.menuback, text="Close", font=("helvetica", int(W//36.4)), bd=5, width=int(W//165.8), command=self.closemenu)
+        exitbut = Button(self.menuback, text="Close", font=("helvetica", int(W//36.4)), bd=5, width=int(W//165.8), command=self.closemenu, cursor="hand2")
         exitbut.place(relx=0.5, rely=0.85, anchor=CENTER)
-        exitbut.config(cursor="hand2")
     #
     #
-        self.freeze()   # shuts down all the buttons so the menu popup cannot be overriden
+        self.freeze()   # shuts down all the gameplay buttons so the menu popup cannot be overriden or ignored
         attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, self.menuback]
         mainlist.extend(attributes)     # adds all the currently displayed objects to mainlist, so that they are destroyed if the newgame button is pushed
 
@@ -382,15 +380,15 @@ class Game:
         self.freeze()
         self.endgame()
 
-    # this function proposes to end the game
+# proposes to end the game
     def want_end(self):
-        # this chunk displays the request
+            # displays the request
         QW = int(W//3)      # stands for request width
         QH = int(H//3)      # stands for request height
         self.request = Canvas(window, width=QW, height=QH, bg="grey", bd=5, relief=RAISED)
         self.request.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.request.create_text(int(QW//2), int(QH/4), text=self.turn + " requests end!", font=("helvetica", int(W//36.4)), width=int(W//2.2), justify=CENTER)
-
+            # creates yes and no buttons
         ybut = Button(self.request, text="YES", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.accept)
         nbut = Button(self.request, text="NO", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.deny)
         ybut.place(relx=0.3, rely=0.6, anchor=CENTER)
@@ -406,7 +404,7 @@ class Game:
         self.unfreeze()
         self.request.destroy()
 
-# this function accepts a request for endgame
+# accepts a request for endgame
     def accept(self):
             # destroys the request popup and ends the game
         self.unfreeze()
@@ -435,6 +433,7 @@ class Game:
         self.endgame()
 
 
+# establishes the game logic and determines when stones die; by Ben
 class Stone:
 
     def __init__(self, x, y, c):
@@ -454,6 +453,8 @@ class Stone:
     def destroy(self):
         print "e"
 
+
+# a datatype for groups of adjacent stones that are the same color, therefore sharing breaths; by Ben
 class Shape:
 
     def __init__(self):
