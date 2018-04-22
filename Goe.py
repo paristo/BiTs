@@ -461,5 +461,12 @@ class Shape:
         print "e"
 
 
+# a datatype for enforcing the ko rule
+class Gamestate:
+
+    def __init__(self):
+        print "e"
+
+
 mainmenu()
 mainloop()
