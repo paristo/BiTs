@@ -1,7 +1,7 @@
 """
 this code simulate board game
 By Tomas Paris and Ben Goldman
-    Tomas wrote the graphic interface (the Game class), including the code which calculates final score, and the mainmenu, explain, close, and start functions
+    Tomas wrote the graphic interface (the gameplay class, excluding the code which calculates final score), and the mainmenu, explain, close, and start functions
     Ben wrote the game logic (the Stone and Shape class)
 
 ## DOC TESTS ##
@@ -70,284 +70,144 @@ master.geometry('%dx%d+0+%d' % (W, H, H*.05))       # opens the window almost fu
 window = Frame(height=H, width=W, bg="white")
 window.place(relx=0.5, rely=0.5, anchor=CENTER)
     # text of all the rules for Go
-rule1 = "1. Black moves first"
-rule2 = "2. Empty spaces are called Breaths"
-rule3 = "3. Stones without adjacent Breaths die"
-rule4 = "4. Adjacent stones of the same color share Breaths"
-korule = "ko rule: moves that revert the game to its state one turn ago cannot be made"
-rule5 = "5. When stones of one color surround an empty space, that space becomes land"
-rule6 = "6. The final score is the total land controlled by a color minus the number of dead stones of that color"
-rule7 = "7. The game ends when both sides agree to end the game, when one side surrenders, or after two consecutive passes"
+rules = [["1. Black is the first player to move", 4, 6.6], ["2. Empty spaces are called Breaths", 4, 4.4], ["3. Stones without adjacent Breaths die", 4, 3.1],
+         ["4. Stones next to one other and of the same color share Breaths", 4, 2.3], ["ko rule: moves that revert the game to its state one turn ago can not be made", 4, 1.7],
+         ["5. When stones of one color wrap around an empty space, that space becomes land", 1.3, 5],
+         ["6. The final score is the total land controlled by a color minus the number of dead stones of that color", 1.3, 2.5],
+         ["7. The game ends when both sides agree to end the game, when one side surrenders, or after two consecutive passes", 1.3, 1.5]]
     # list to hold objects for deletion
 mainlist = []
 
 
 # displays the main menu; written by Tomas
 def mainmenu():
-    close()     # clears the display
         # draws a backdrop for the main menu
     backdrop = Canvas(window, width=W/2.0, height=H/1.2, bg="#DEB887", bd=5, relief=RIDGE)
     backdrop.place(relx=0.5, rely=0.5, anchor=CENTER)
         # the welcome message
-    welcome = Label(window, text="Welcome to Go!", font=("helvetica", int(W//18.2)), bg="#DEB887")
+    welcome = Label(backdrop, text="Welcome to Go!", font=("helvetica", int(W//18.2)), bg="#DEB887")
     welcome.place(relx=0.5, rely=0.2, anchor=CENTER)
         # the new game button, it activates the start function
-    new = Button(window, text="NEW GAME", font=("helvetica", int(W//36.4)), bd=5, command=start, height=int(H//405), width=int(W//121), cursor="hand2")
-    new.place(relx=0.5, rely=0.45, anchor=CENTER)
+    new = Clicker(backdrop, "NEW GAME", 36.4, start, 121, 0.5, 0.45, 405)
         # the rules button, it activates the explain function
-    rules = Button(window, text="RULES", font=("helvetica", int(W//36.4)), bd=5, command=explain, height=int(H//405), width=int(W//121), cursor="hand2")
-    rules.place(relx=0.5, rely=0.7, anchor=CENTER)
+    rules = Clicker(backdrop, "RULES", 36.4, explain, 121, 0.5, 0.7, 405)
         # places all the displayed objects into mainlist, to be destroyed later
-    attributes = [backdrop, welcome, new, rules]
-    mainlist.extend(attributes)
+    attributes = [backdrop]
+    mainlist.append(attributes)
 
 #clears the display; by Tommas
 def close():
+    front = len(mainlist)-1
         #destroys every item in mainlist, clearing the display for new objects
-    for item in mainlist:
+    for item in mainlist[front]:
         item.destroy()
-    del mainlist[:]
+    del mainlist[front]
 
 
 # opens a window and displays the rules; by Tomas
 def explain():
-    close()     # clears the display
+    blank = Canvas(window, width=W, height=H, bg="white")
+    blank.place(relx=0.5, rely=0.5, anchor=CENTER)
+    fill_rules(blank, W, H,)
+
+
+def fill_rules(backdrop, rule_W, rule_H):
         # displays all the text of the rules
-    instructions = Message(window, text="Rules of Go:", font=("helvetica", int(W//18.2)), width=int(W//1.8), bg="white")
-    instructions.place(relx=0.5, rely=0.07, anchor=CENTER)
-    rule_1 = Message(window, text=rule1, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_1.place(relx=0.02, rely=0.12)
-    rule_2 = Message(window, text=rule2, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_2.place(relx=0.02, rely=0.22)
-    rule_3 = Message(window, text=rule3, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_3.place(relx=0.02, rely=0.32)
-    rule_4 = Message(window, text=rule4, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_4.place(relx=0.02, rely=0.452)
-    rule_ko = Message(window, text=korule, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_ko.place(relx=0.02, rely=0.6)
-    rule_5 = Message(window, text=rule5, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_5.place(relx=0.5, rely=0.12)
-    rule_6 = Message(window, text=rule6, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_6.place(relx=0.5, rely=0.32)
-    rule_7 = Message(window, text=rule7, font=("helvetica", int(W//36.4)), width=int(W//2.3), justify=LEFT, bg="white")
-    rule_7.place(relx=0.5, rely=0.52)
-        # creates the menu button
-    mainreturn = Button(window, text="RETURN", font=("helvetica", int(W//36.4)), bd=5, command=mainmenu, height=int(H//405), width=int(W//121), cursor="hand2")
-    mainreturn.place(relx=0.5, rely=0.85, anchor=CENTER)
+    backdrop.create_text(int(rule_W//2), int(rule_H//16), text="Rules of Go:", font=("helvetica", int(rule_W//18.2)), width=W)
+    for rule in rules:
+        backdrop.create_text(int(rule_W//rule[1]), int(rule_H//rule[2]), text=rule[0], font=("helvetica", int(rule_W//36.4)), width=int(rule_W//2.3), justify=LEFT)
+        # makes the close button
+    norule = Button(backdrop, text="CLOSE", font=("helvetica", int(rule_W//36.4)), bd=5, width=int(rule_W//121), height=int(H//405), command=close, cursor="hand2")
+    norule.place(relx=0.5, rely=0.88, anchor=CENTER)
         # adds all the displayed object to the mainlist to be destroyed later
-    attributes = [instructions, rule_1, rule_2, rule_3, rule_4, rule_ko, rule_5, rule_6, rule_7, mainreturn]
-    mainlist.extend(attributes)
+    attributes = [backdrop]
+    mainlist.append(attributes)
 
 
 # new game button is directed here to open up the Game class, since buttons can't directly open a class; by Tomas
 def start():
     close()     # clears the display
-    gameplay = Game()
+    global white, black, go, game
+    white = Bumper("White:", 0.89)
+    black = Bumper("Black:", 0.11)
+    go = Board()
+    game = Gameplay()
 
 
 # a datatype for the game display interface and movement; by Tomas
-class Game:
+class Gameplay:
 
     def __init__(self):
-        # next 20 lines fill the left side of the window
-            # creates grey bumper
-        BW = int(W//5.2)    # BW stands for bumper width
-        BH = int(H//1.3)    # BH stands for bumper height
-        self.blackbumber = Canvas(window, width=BW, height=BH, bg="grey", bd=5, relief=GROOVE)
-        self.blackbumber.place(relx=0.11, rely=0.5, anchor=CENTER)
-            # displays text labels on bumper
-        self.blackbumber.create_text(int(BW//2.1), int(BH//11.2), text="Black:", font=("helvetica", int(W//22.8)), width=int(W//6))
-        self.blackbumber.create_text(int(BW//1.9), int(BH//3.6), text="Pieces Captured:", font=("helvetica", int(W//45.6)), width=int(W//4.5))
-        self.blackbumber.create_text(int(BW//3.8), int(BH//1.5), text='Score:', font=("helvetica", int(W//45.6)), width=int(W//6))
-            # displays the state of black side
-        self.turn = "Black"     # used as an easy way to check whose turn it is
-        self.blackstate = "(Moving)"
-        self.currentblack = self.blackbumber.create_text(int(BW//2.6), int(BH//6.4), text=self.blackstate, font=("helvetica", int(W//45.6)), width=int(W//6))
-            # displays the score of black side
-        self.blackscore = "TBD"
-        self.blackscored = self.blackbumber.create_text(int(BW//2), int(BH//1.2), text=self.blackscore, font=("helvetica", int(W//15.2)), width=int(W//6))
-    #
-    #
-        # next 15 lines fill the right side of the window
-            # creates the grey bumper
-        self.whitebumber = Canvas(window, width=BW, height=BH, bg="grey", bd=5, relief=GROOVE)
-        self.whitebumber.place(relx=0.89, rely=0.5, anchor=CENTER)
-            # displays text labels on bumper
-        self.whitebumber.create_text(int(BW//2.1), int(BH//11.2), text="White:", font=("helvetica", int(W//22.8)), width=int(W//6))
-        self.whitebumber.create_text(int(BW//1.9), int(BH//3.6), text="Pieces Captured:", font=("helvetica", int(W//45.6)), width=int(W//4.5))
-        self.whitebumber.create_text(int(BW//3.8), int(BH//1.5), text='Score:', font=("helvetica", int(W//45.6)), width=int(W//6))
-            # displays the state of white side
-        self.whitestate = "(Waiting)"
-        self.currentwhite = self.whitebumber.create_text(int(BW//2.6), int(BH//6.4), text=self.whitestate, font=("helvetica", int(W//45.6)), width=int(W//6))
-            # displays the score of white side
-        self.whitescore = "TBD"
-        self.whitescored = self.whitebumber.create_text(int(BW//2), int(BH//1.2), text=self.whitescore, font=("helvetica", int(W//15.2)), width=int(W//6))
-    #
-    #
-        # fills the center of the window
             # displays the total moves played, using necessary tkinter variable types
         self.total = 0
         self.totalmove = StringVar()    # tkinter Message() objects need StringVar() in order to update display while still running
         self.totalmove.set("Total Moves: " + str(self.total))
         self.counter = Message(window, textvariable=self.totalmove, font=("helvetica", int(W//45.6)), width=int(W//6), justify=RIGHT, bg="white")
         self.counter.place(relx=0.5, rely=0.04, anchor=CENTER)
-            # creates the board
-        self.BS = int(H//1.2)    # BS stands for board side
-        BS = self.BS
-        self.board = Canvas(window, width=BS, height=BS, bg="#DEB887", bd=5, relief=RIDGE)
-        self.board.place(relx=0.5, rely=0.5, anchor=CENTER)
-            # creates the grid of lines on the board
-        G = BS/10.0     # G stands for grid
-        for line in range(1, 10):
-            self.board.create_line(G, (G * line), 9*G, (G * line), width=2)
-            self.board.create_line((G * line), G, (G * line), 9*G, width=2)
-            # creates the diamonds on the grid
-        UD = 3*G    # UD stands for upper diamond
-        LD = 7*G    # LD stands for lower diamond
-        DS = int(BS//50)    # DS stands for diamond size
-        self.board.create_polygon(UD, UD-DS, UD+DS, UD, UD, UD+DS, UD-DS, UD, fill="black")
-        self.board.create_polygon(LD, UD-DS, LD+DS, UD, LD, UD+DS, LD-DS, UD, fill="black")
-        self.board.create_polygon(UD, LD-DS, UD+DS, LD, UD, LD+DS, UD-DS, LD, fill="black")
-        self.board.create_polygon(LD, LD-DS, LD+DS, LD, LD, LD+DS, LD-DS, LD, fill="black")
-        M = int(BS//2)  # M stands for middle
-        self.board.create_polygon(M, M-DS, M+DS, M, M, M+DS, M-DS, M, fill="black")
-            # this array represents the places for stones
-        self.places = [[None for x in range(9)] for x in range(9)]
-            # creates the pieces on the board (they start out invisible)
-        C = int(BS//25)     # C stands for circle size
-        self.intersect = [[None for x in range(9)] for x in range(9)]
-        for dot_x in range(1, 10):
-            for dot_y in range(1, 10):
-                self.intersect[dot_x - 1][dot_y - 1] = self.board.create_oval(((G * dot_x) - C), ((G * dot_y) - C),
-                                                                              ((G * dot_x) + C), ((G * dot_y) + C),
-                                                                              fill="", outline="")
+
+        self.turn = "Black"     # black moves first
+        self.places = [[None for x in range(9)] for x in range(9)]      # this array will represent moves using the Stone class
         self.last_pas = None    # allows comparison operations with this variable before it is really assigned an important value
         self.unfreeze()         # calls another function to finish displaying the game interface
 
-# places a stone
-    def move(self, event):
-            # grabs the location of the mouse when it was clicked, and through fancy division finds the stone location that was clicked
-        BS = self.BS
-        x = (event.x - int(BS//20)) // int(BS//10)
-        y = (event.y - int(BS//20)) // int(BS//10)
-            # fills the stone that was clicked depending on whose turn it was
-        if not self.places[x][y]:
-            if self.turn == "Black":
-                self.board.itemconfig(self.intersect[x][y], fill="black")
-                self.places[x][y] = Stone(x, y, "B")                        # calls the stone class
-            else:
-                self.board.itemconfig(self.intersect[x][y], fill="white")
-                self.places[x][y] = Stone(x, y, "W")                        # calls the stone class
-            self.play()     # changes whose turn it is
+# adds buttons
+    def unfreeze(self):
+            # makes buttons
+        self.menu = Clicker(window, "OPTIONS", 45.6, self.menu, 182.4, 0.92, 0.05)
+        self.X_menu = Clicker(window, "UNDO", 45.6, self.undo, 182.4, 0.08, 0.05)
+        self.T_pass = Clicker(window, "PASS", 91.2, self.pas, 121.6, 0.38, 0.965)
+        self.surrend = Clicker(window, "SURRENDER", 91.2, self.surrender, 121.6, 0.5, 0.965)
+        self.stop = Clicker(window, "PROPOSE END", 91.2, self.want_end, 121.6, 0.62, 0.965)
+        go.unfreeze()   # unfreezes the board
+
+# deletes all the buttons
+    def freeze(self, ):
+        remove(self.menu, self.X_menu, self.T_pass, self.surrend, self.stop)    # destroys unnecessary buttons
+        go.freeze()     # freezes the board
 
 # changes whose turn it is
     def play(self):
             # if else statement changes whose turn it is
         if self.turn == "Black":
-            self.blackstate = "(Waiting)"
-            self.whitestate = "(Moving)"
             self.turn = "White"
         else:
-            self.blackstate = "(Moving)"
-            self.whitestate = "(Waiting)"
             self.turn = "Black"
             # increases the total moves, and deletes the pass message, if present
         self.total += 1
         if (self.total - 1) == self.last_pas:
-            self.board.delete(self.pasmesg)
+            go.board.delete(self.pasmesg)
             # updates the displays on the board using tkinter methods
         self.totalmove.set("Total Moves: " + str(self.total))
-        self.blackbumber.itemconfig(self.currentblack, text=self.blackstate)
-        self.whitebumber.itemconfig(self.currentwhite, text=self.whitestate)
+        black.change_state()
+        white.change_state()
 
-# adds buttons
-    def unfreeze(self):
-            # makes each stone a button
-        for dot_x in range(1, 10):
-            for dot_y in range(1, 10):
-                self.board.tag_bind(self.intersect[dot_x-1][dot_y-1], "<Button-1>", self.move)
-            # sets a new cursor for the board
-        self.board.config(cursor="tcross")
-            # makes the menu button
-        self.menubut = Button(window, text="OPTIONS", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.menu, cursor="hand2")
-        self.menubut.place(relx=0.92, rely=0.05, anchor=CENTER)
-            # makes the pass button
-        self.turn_pass = Button(window, text="PASS", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.pas, cursor="hand2")
-        self.turn_pass.place(relx=0.38, rely=0.965, anchor=CENTER)
-            # makes the surrender button
-        self.surrend_butn = Button(window, text="SURRENDER", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.surrender, cursor="hand2")
-        self.surrend_butn.place(relx=0.5, rely=0.965, anchor=CENTER)
-            # makes the end game button
-        self.stop_game = Button(window, text="PROPOSE END", font=("helvetica", int(W//91.2)), bd=5, width=int(W//121.6), command=self.want_end, cursor="hand2")
-        self.stop_game.place(relx=0.62, rely=0.965, anchor=CENTER)
-
-# deletes all the buttons
-    def freeze(self):
-            # destroys unnecessary buttons
-        self.turn_pass.destroy()
-        self.surrend_butn.destroy()
-        self.stop_game.destroy()
-        self.menubut.destroy()
-            # disables the special cursor above the board
-        self.board.config(cursor="arrow")
-            # unbinds the buttons attached to each stone
-        for dot_x in range(1, 10):
-            for dot_y in range(1, 10):
-                self.board.tag_unbind(self.intersect[dot_x - 1][dot_y - 1], "<Button-1>")
+    def undo(self):
+        print "e"
 
 # displays the menu popup
     def menu(self):
-            # displays the popup window
-        MW = int(W//4.5)    # stands for menu width
-        MH = int(H//2)      # stands for menu height
-        self.menuback = Canvas(window, width=MW, height=MH, bg="grey", bd=5, relief=RAISED)
-        self.menuback.place(relx=0.5, rely=0.5, anchor=CENTER)
-        self.menuback.create_text(int(MW//2), int(MH//6), text="MENU", font=("helvetica", int(W//18.2)), width=int(W//2.2), justify=CENTER)
-            # makes the new game button
-        newgame = Button(self.menuback, text="New Game", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=start, cursor="hand2")
-        newgame.place(relx=0.5, rely=0.4, anchor=CENTER)
-            # makes the rules button
-        rulebut = Button(self.menuback, text="Rules", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.rulepopup, cursor="hand2")
-        rulebut.place(relx=0.5, rely=0.6, anchor=CENTER)
-            # makes the close button
-        exitbut = Button(self.menuback, text="Close", font=("helvetica", int(W//36.4)), bd=5, width=int(W//165.8), command=self.closemenu, cursor="hand2")
-        exitbut.place(relx=0.5, rely=0.85, anchor=CENTER)
-    #
-    #
+        global menu
+        menu = Popup(4.5, 2, 6, "MENU", 18.2)   # displays the popup window
+            # makes buttons
+        newgame = Clicker(menu.back, "New Game", 45.6, start, 182.4, 0.5, 0.4)
+        rule = Clicker(menu.back, "Rules", 45.6, self.rulepopup, 182.4, 0.5, 0.6)
+        exit = Clicker(menu.back, "Close", 30, self.closemenu, 165, 0.5, 0.85)
+
         self.freeze()   # shuts down all the gameplay buttons so the menu popup cannot be overriden or ignored
-        attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, self.menuback]
-        mainlist.extend(attributes)     # adds all the currently displayed objects to mainlist, so that they are destroyed if the newgame button is pushed
+        attributes = [black.bumper, self.counter, go.board, white.bumper, menu.back]
+        mainlist.append(attributes)     # adds all the currently displayed objects to mainlist, so that they are destroyed if the newgame button is pushed
 
 # destroys the menu popup
     def closemenu(self):
-        self.menuback.destroy()
-        del mainlist[:]     # clears the currently active objects from mainlist so that they do not build up each time the menu is opened
+        menu.back.destroy()
+        del mainlist[0]     # clears the currently active objects from mainlist so that they do not build up each time the menu is opened
         self.unfreeze()     # reactivates the buttons on the board to continue gameplay
 
 # displays the rules popup
     def rulepopup(self):
-            # displays the popup background
-        RW = int(W//3)      # stands for rule width
-        RH = int(H//1.5)    # stands for rule height
-        self.ruleback = Canvas(window, width=RW, height=RH, bg="grey", bd=5, relief=RAISED)
-        self.ruleback.place(relx=0.5, rely=0.5, anchor=CENTER)
-            # displays the text of all the rules
-        self.ruleback.create_text(int(RW//2), int(RH//16), text="Rules of Go:", font=("helvetica", int(W//36.4)), width=W)
-        self.ruleback.create_text(int(RW//4), int(RH//6.6), text=rule1, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//4), int(RH//4.4), text=rule2, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//4), int(RH//3.1), text=rule3, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//4), int(RH//2.3), text=rule4, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//4), int(RH//1.7), text=korule, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//1.3), int(RH//5), text=rule5, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//1.3), int(RH//2.5), text=rule6, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-        self.ruleback.create_text(int(RW//1.3), int(RH//1.5), text=rule7, font=("helvetica", int(W//72.9)), width=int(W//7.3))
-            # makes the close button
-        norule = Button(self.ruleback, text="Close", font=("helvetica", int(W//45.6)), bd=5, width=int(W//114), height=1, command=self.closerule, cursor="hand2")
-        norule.place(relx=0.5, rely=0.88, anchor=CENTER)
-
-# destroys the rules popup
-    def closerule(self):
-        self.ruleback.destroy()
+        global rule
+        rule = Popup(2, 2)
+        fill_rules(rule.back, rule.PW, rule.PH)
 
 # skips the players turn, or ends the game after two consecutive passes
     def pas(self):
@@ -356,8 +216,7 @@ class Game:
         else:
             self.last_pas = self.total + 1      # last_pas helps check if two players passed consecutively
                 # displays a message notifying that a move was passed
-            BS = self.BS
-            self.pasmesg = self.board.create_text(int(BS//2), int(BS//25), text=self.turn+" passed!", font=("helvetica", int(W//72.9)), width=int(W//6))
+            self.pasmesg = go.board.create_text(int(go.BS//2), int(go.BS//25), text=self.turn+" passed!", font=("helvetica", int(W//72.9)), width=int(W//6))
             self.play()
 
 # ends the game, whoever pushes it loses
@@ -365,72 +224,181 @@ class Game:
             # sets the scores
         self.play()
         if self.turn == "Black":
-            self.blackstate = "Winner!"
-            self.blackscore = "Default"
-            self.whitestate = "Loser"
-            self.whitescore = "Forfeit"
+            black.state = "Winner!"
+            black.score = "Default"
+            white.state = "Loser"
+            white.score = "Forfeit"
         else:
-            self.whitestate = "Winner!"
-            self.whitescore = "Default"
-            self.blackstate = "Loser"
-            self.blackscore = "Forfeit"
+            white.state = "Winner!"
+            white.score = "Default"
+            black.state = "Loser"
+            black.score = "Forfeit"
             # updates the display
-        self.blackbumber.itemconfig(self.blackscored, font=("helvetica", int(W//26)))
-        self.whitebumber.itemconfig(self.whitescored, font=("helvetica", int(W//26)))
+        black.bumper.itemconfig(black.scored, font=("helvetica", int(W//26)))
+        white.bumper.itemconfig(white.scored, font=("helvetica", int(W//26)))
         self.freeze()
         self.endgame()
 
 # proposes to end the game
     def want_end(self):
             # displays the request
-        QW = int(W//3)      # stands for request width
-        QH = int(H//3)      # stands for request height
-        self.request = Canvas(window, width=QW, height=QH, bg="grey", bd=5, relief=RAISED)
-        self.request.place(relx=0.5, rely=0.5, anchor=CENTER)
-        self.request.create_text(int(QW//2), int(QH/4), text=self.turn + " requests end!", font=("helvetica", int(W//36.4)), width=int(W//2.2), justify=CENTER)
+        global want
+        want = Popup(3, 3, 4, (self.turn + " requests end!"), 36.4)
             # creates yes and no buttons
-        ybut = Button(self.request, text="YES", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.accept)
-        nbut = Button(self.request, text="NO", font=("helvetica", int(W//45.6)), bd=5, width=int(W//182.4), command=self.deny)
-        ybut.place(relx=0.3, rely=0.6, anchor=CENTER)
-        ybut.config(cursor="hand2")
-        nbut.place(relx=0.7, rely=0.6, anchor=CENTER)
-        nbut.config(cursor="hand2")
+        yes = Clicker(want.back, "YES", 45.6, self.accept, 182.4, 0.3, 0.6)
+        no = Clicker(want.back, "NO", 45.6, self.deny, 182.4, 0.7, 0.6)
         self.play()
         self.freeze()
 
 # denies a request for endgame
     def deny(self):
             # destroys the request popup
+        want.back.destroy()
         self.unfreeze()
-        self.request.destroy()
 
 # accepts a request for endgame
     def accept(self):
             # destroys the request popup and ends the game
         self.unfreeze()
-        self.request.destroy()
+        want.back.destroy()
         self.findscore()
 
 # shows the final score
     def endgame(self):
             # updates the display
-        self.blackbumber.itemconfig(self.currentblack, text=self.blackstate)
-        self.whitebumber.itemconfig(self.currentwhite, text=self.whitestate)
-        self.blackbumber.itemconfig(self.blackscored, text=self.blackscore)
-        self.whitebumber.itemconfig(self.whitescored, text=self.whitescore)
-            # creates new game button
-        newgame = Button(window, text="New Game", font=("helvetica", int(W // 91.2)), bd=5, width=int(W // 182.4), command=start)
-        newgame.place(relx=0.5, rely=0.965, anchor=CENTER)
-        newgame.config(cursor="hand2")
-            # adds all the currently displayed objects to mainlist, so that they are destroyed if the newgame button is pushed
-        attributes = [self.blackbumber, self.counter, self.board, self.whitebumber, newgame]
-        mainlist.extend(attributes)
+        black.update()
+        white.update()
+        newgame = Clicker(window, "New Game", 91.2, start, 182.4, 0.5, 0.965)   # creates new game button
+        attributes = [black.bumper, self.counter, go.board, white.bumper, newgame.click]
+        mainlist.append(attributes)     # adds all the currently displayed objects to mainlist, so that they are destroyed if the newgame button is pushed
 
 # analyzes the board and finds the final score
     def findscore(self):
         print "e"
         self.freeze()
         self.endgame()
+
+
+class Board:
+
+    def __init__(self):
+    # creates the board
+        self.BS = int(H // 1.2)  # BS stands for board side
+        BS = self.BS
+        self.board = Canvas(window, width=BS, height=BS, bg="#DEB887", bd=5, relief=RIDGE)
+        self.board.place(relx=0.5, rely=0.5, anchor=CENTER)
+        # creates the grid of lines on the board
+        G = BS / 10.0  # G stands for grid
+        for line in range(1, 10):
+            self.board.create_line(G, (G * line), 9 * G, (G * line), width=2)
+            self.board.create_line((G * line), G, (G * line), 9 * G, width=2)
+            # creates the diamonds on the grid
+        UD = 3 * G  # UD stands for upper diamond
+        LD = 7 * G  # LD stands for lower diamond
+        DS = int(BS // 50)  # DS stands for diamond size
+        self.board.create_polygon(UD, UD - DS, UD + DS, UD, UD, UD + DS, UD - DS, UD, fill="black")
+        self.board.create_polygon(LD, UD - DS, LD + DS, UD, LD, UD + DS, LD - DS, UD, fill="black")
+        self.board.create_polygon(UD, LD - DS, UD + DS, LD, UD, LD + DS, UD - DS, LD, fill="black")
+        self.board.create_polygon(LD, LD - DS, LD + DS, LD, LD, LD + DS, LD - DS, LD, fill="black")
+        M = int(BS // 2)  # M stands for middle
+        self.board.create_polygon(M, M - DS, M + DS, M, M, M + DS, M - DS, M, fill="black")
+        # creates the pieces on the board (they start out invisible)
+        C = int(BS // 25)  # C stands for circle size
+        self.intersect = [[None for x in range(9)] for x in range(9)]
+        for dot_x in range(1, 10):
+            for dot_y in range(1, 10):
+                self.intersect[dot_x - 1][dot_y - 1] = self.board.create_oval(((G * dot_x) - C), ((G * dot_y) - C), ((G * dot_x) + C), ((G * dot_y) + C), fill="", outline="")
+
+    def freeze(self):
+        # disables the special cursor above the board
+        self.board.config(cursor="arrow")
+        # unbinds the buttons attached to each stone
+        for dot_x in range(1, 10):
+            for dot_y in range(1, 10):
+                self.board.tag_unbind(self.intersect[dot_x - 1][dot_y - 1], "<Button-1>")
+
+    def unfreeze(self):
+        # makes each stone a button
+        for dot_x in range(1, 10):
+            for dot_y in range(1, 10):
+                self.board.tag_bind(self.intersect[dot_x - 1][dot_y - 1], "<Button-1>", self.move)
+                # sets a new cursor for the board
+        self.board.config(cursor="tcross")
+
+# places a stone
+    def move(self, event):
+            # grabs the location of the mouse when it was clicked, and through fancy division finds the stone location that was clicked
+        BS = self.BS
+        x = (event.x - int(BS//20)) // int(BS//10)
+        y = (event.y - int(BS//20)) // int(BS//10)
+            # fills the stone that was clicked depending on whose turn it was
+        if not game.places[x][y]:
+            if game.turn == "Black":
+                self.board.itemconfig(self.intersect[x][y], fill="black")
+                game.places[x][y] = Stone(x, y, "B")                        # calls the stone class
+            else:
+                self.board.itemconfig(self.intersect[x][y], fill="white")
+                game.places[x][y] = Stone(x, y, "W")                        # calls the stone class
+            game.play()     # changes whose turn it is
+
+
+class Bumper:
+
+    def __init__(self, color, place):
+        BW = int(W // 5.2)  # BW stands for bumper width
+        BH = int(H // 1.3)  # BH stands for bumper height
+
+        self.bumper = Canvas(window, width=BW, height=BH, bg="grey", bd=5, relief=GROOVE)
+        self.bumper.place(relx=place, rely=0.5, anchor=CENTER)
+        # displays text labels on bumper
+        self.bumper.create_text(int(BW // 2.1), int(BH // 11.2), text=color, font=("helvetica", int(W // 22.8)), width=int(W // 6))
+        self.bumper.create_text(int(BW // 1.9), int(BH // 3.6), text="Pieces Captured:", font=("helvetica", int(W // 45.6)), width=int(W // 4.5))
+        self.bumper.create_text(int(BW // 3.8), int(BH // 1.5), text='Score:', font=("helvetica", int(W // 45.6)), width=int(W // 6))
+        # displays the state of side
+        if color == "White:":
+            self.state = "(Waiting)"
+        else:
+            self.state = "(Moving)"
+        self.current = self.bumper.create_text(int(BW // 2.6), int(BH // 6.4), text=self.state, font=("helvetica", int(W // 45.6)), width=int(W // 6))
+        # displays the score of side
+        self.score = "TBD"
+        self.scored = self.bumper.create_text(int(BW // 2), int(BH // 1.2), text=self.score, font=("helvetica", int(W // 15.2)), width=int(W // 6))
+
+    def change_state(self):
+        if self.state == "(Moving)":
+            self.state = "(Waiting)"
+        else:
+            self.state = "(Moving)"
+            # updates the displays on the board using tkinter methods
+        self.update()
+
+    def update(self):
+        self.bumper.itemconfig(self.current, text=self.state)
+        self.bumper.itemconfig(self.scored, text=self.score)
+
+
+# creates button
+class Clicker:
+
+    def __init__(self, anchor, mesg, size, go_to, wide, place_x, place_y, high=H):
+        self.click = Button(anchor, text=mesg, font=("helvetica", int(W//size)), bd=5, width=int(W//wide), height=int(H//high), command=go_to, cursor="hand2")
+        self.click.place(relx=place_x, rely=place_y, anchor=CENTER)
+
+
+def remove(*buttons):
+    for button in buttons:
+        button.click.destroy()
+
+
+class Popup:
+
+    def __init__(self, div_wid, div_high, title_high=1, title="", title_font=1):
+        # displays the popup background
+        self.PW = int(W // div_wid)  # stands for popup width
+        self.PH = int(H // div_high)  # stands for popup height
+        self.back = Canvas(window, width=self.PW, height=self.PH, bg="grey", bd=5, relief=RAISED)
+        self.back.place(relx=0.5, rely=0.5, anchor=CENTER)
+        self.back.create_text(int(self.PW//2), int(self.PH//title_high), text=title, font=("helvetica", int(W//title_font)), width=W, justify=CENTER)
 
 
 # establishes the game logic and determines when stones die; by Ben
