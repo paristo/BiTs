@@ -127,11 +127,16 @@ def fill_rules(backdrop, rule_W, rule_H):
 # new game button is directed here to open up the Game class, since buttons can't directly open a class; by Tomas
 def start():
     close()     # clears the display
-    global white, black, go, game
+    global white, black, go, game, shapelist, landlist, screenshot
+    shapelist = [None]
+    landlist = [None]
     white = Bumper("White:", 0.89)
     black = Bumper("Black:", 0.11)
     go = Board()
     game = Gameplay()
+    screenshot = Gamestate()
+    
+    
 
 
 # a datatype for the game display interface and movement; by Tomas
@@ -180,9 +185,27 @@ class Gameplay:
         self.totalmove.set("Total Moves: " + str(self.total))
         black.change_state()
         white.change_state()
-
+        
     def undo(self):
-        print "e"
+        print screenshot.preimage, "pre"
+        print screenshot.image
+        for y in range(9):
+            for x in range(9):
+                if screenshot.preimage[0] == "T" and game.places[x][y]:
+                    game.places[x][y].destroy()
+                    screenshot.preimage = screenshot.preimage[1:]
+                
+                elif screenshot.preimage[0] == "T" and not game.places[x][y]:
+                    screenshot.preimage = screenshot.preimage[1:]
+                    continue
+                elif screenshot.preimage[0] =="W":
+                    self.places[x][y].color = "W"
+                    screenshot.preimage = screenshot.preimage[1:]
+                else:
+                    self.places[x][y].color = "B"
+                    screenshot.preimage = screenshot.preimage[1:]
+
+                    
 
 # displays the menu popup
     def menu(self):
@@ -274,7 +297,77 @@ class Gameplay:
 
 # analyzes the board and finds the final score
     def findscore(self):
-        print "e"
+        edgecount = 0
+        black.score = 0
+        white.score = 0
+        
+        for y in range(9):
+            for x in range(9):
+                if not self.places[x][y]:
+                    self.places[x][y] = Stone(x, y, "Y")
+        for y in range(9):
+            for x in range(9):
+                if self.places[x][y].island == 0 and self.places[x][y].color == "Y":
+                        adjacent_places = []
+                        if (x + 1) < 9:
+                            adjacent_places.append((x + 1, y))
+                        if (y - 1) >= 0:
+                            adjacent_places.append((x, y - 1))
+                        if (x - 1) >= 0:
+                            adjacent_places.append((x - 1, y))
+                        if (y + 1) < 9:
+                            adjacent_places.append((x, y + 1))
+                        landlist.append(Shape())
+                        self.places[x][y].island = len(landlist) - 1
+                        landlist[self.places[x][y].island].add_stone(self.places[x][y])
+                        for place in adjacent_places:
+                            piece = self.places[place[0]][place[1]]
+                            if piece.color == "Y" and not landlist[piece.island]:
+                                if (piece.x + 1) < 9:
+                                    adjacent_places.append((piece.x + 1, piece.y))
+                                if (piece.y - 1) >= 0:
+                                    adjacent_places.append((piece.x, piece.y - 1))
+                                if (piece.x - 1) >= 0:
+                                    adjacent_places.append((piece.x - 1, piece.y))
+                                if (piece.y + 1) < 9:
+                                    adjacent_places.append((piece.x, piece.y + 1))
+                                piece.island = self.places[x][y].island
+                                landlist[piece.island].add_stone(piece)                       
+                           
+        for land in landlist[1:]:
+            print "check\n"
+            for space in land.stones:
+                if space.x == 0 or space.x == 8 or space.y == 0 or space.y == 8:
+                    edgecount = edgecount + 1
+                    if edgecount > 1:
+                        break
+                if edgecount < 2:
+                    adjacencies = []
+                    if (space.x + 1) < 9:
+                        adjacencies.append((space.x + 1, space.y))
+                    if (space.y - 1) >= 0:
+                        adjacencies.append((space.x, space.y - 1))
+                    if (space.x - 1) >= 0:
+                        adjacencies.append((space.x - 1, space.y))
+                    if (space.y + 1) < 9:
+                        adjacencies.append((space.x, space.y + 1))
+                    for spot in adjacencies:
+                        piece = self.places[place[0]][place[1]]
+                        if piece != "Y":
+                            if color:
+                                if piece.color != color:
+                                    check = True
+                                    break
+                            else:
+                                color = piece.color
+                    if not check:
+                        if color == "B":
+                            black.score = black.score + 1
+                        else:
+                            white.score = white.score + 1
+                            
+            else:
+                continue
         self.freeze()
         self.endgame()
 
@@ -340,6 +433,7 @@ class Board:
                 self.board.itemconfig(self.intersect[x][y], fill="white")
                 game.places[x][y] = Stone(x, y, "W")                        # calls the stone class
             game.play()     # changes whose turn it is
+            game.places[x][y].effect()
 
 
 class Bumper:
@@ -360,6 +454,9 @@ class Bumper:
         else:
             self.state = "(Moving)"
         self.current = self.bumper.create_text(int(BW // 2.6), int(BH // 6.4), text=self.state, font=("helvetica", int(W // 45.6)), width=int(W // 6))
+        # displays the captured pieces
+        self.capture = 0
+        self.captured = self.bumper.create_text(int(BW // 2), int(BH // 2.2), text=str(self.capture), font=("helvetica", int(W // 15.2)), width=int(W // 6))
         # displays the score of side
         self.score = "TBD"
         self.scored = self.bumper.create_text(int(BW // 2), int(BH // 1.2), text=self.score, font=("helvetica", int(W // 15.2)), width=int(W // 6))
@@ -405,35 +502,178 @@ class Popup:
 class Stone:
 
     def __init__(self, x, y, c):
-        self.x_cord = x
-        self.y_cord = y
+        self.x = x
+        self.y = y
         self.color = c
+        self.island = 0
+        self.life = 0
+        self.checked_shapes = []
+        self.adjacent_places = []
+        if (self.x + 1) < 9:
+            self.adjacent_places.append((self.x + 1, self.y))
+        if (self.y - 1) >= 0:
+            self.adjacent_places.append((self.x, self.y-1))
+        if (self.x - 1) >= 0:
+            self.adjacent_places.append((self.x - 1, self.y))
+        if (self.y + 1) < 9:
+            self.adjacent_places.append((self.x, self.y + 1))
+            
+            
+
+    def give_life(self):
+        for piece in self.adjacent_places:
+            if not game.places[piece[0]][piece[1]] and (piece not in shapelist[self.island].empty_pieces):
+                shapelist[self.island].empty_pieces.append(piece)
+                shapelist[self.island].shape_life = shapelist[self.island].shape_life + 1
+        
 
     # this function checks the life of a piece
-    def life(self):
-        print "e"
+    def check_life(self):
+        if self.life == 0:
+            self.destroy()
+        
 
     # this function checks the effect of a piece on other nearby pieces
     def effect(self):
-        print "e"
+        for place in self.adjacent_places:
+            piece = game.places[place[0]][place[1]]
+            if not piece:
+                self.life = self.life + 1
+            elif self.color == piece.color:
+                piece.life = piece.life - 1
+                if shapelist[piece.island]:
+                    if shapelist[self.island] and self.island == piece.island:
+                        continue
+                        
+                    elif shapelist[self.island] and self.island != piece.island:
+                        holder = self.island
+                        for stone in shapelist[self.island].stones:
+                            stone.island = piece.island
+                            shapelist[piece.island].add_stone(stone)
+                        shapelist[holder] = None
+                        
+                    else:
+                        self.island = piece.island
+                        shapelist[piece.island].shape_life = shapelist[piece.island].shape_life - 1
+                        shapelist[piece.island].add_stone(self)
+                        
+                else:
+                    if shapelist[self.island]:
+                        piece.island = self.island
+                        shapelist[self.island].add_stone(piece)
+                    else:
+                        shapelist.append(Shape()) 
+                        self.island = len(shapelist)-1
+                        piece.island = self.island
+                        shapelist[self.island].indexed = self.island
+                        shapelist[self.island].add_stone(piece)
+                        shapelist[self.island].add_stone(self)
+                    
+                     
+
+
+                    
+            else:
+                # if the piece is in an island byt the placed stone has not subtracted a life from the shape
+                if shapelist[piece.island] and (piece.island not in self.checked_shapes):
+                    self.checked_shapes.append(piece.island)
+                    shapelist[piece.island].shape_life = shapelist[piece.island].shape_life - 1
+                    shapelist[piece.island].check_life()
+
+                # if the piece is in an island but the placed stone has already subtracted a life from the shape
+                elif shapelist[piece.island] and (piece.island in self.checked_shapes):
+                    piece.life = piece.life - 1
+                    
+                else:
+                    # only if the piece is the opposite color
+                    piece.life = piece.life - 1
+                    piece.check_life()
+                
+                
+        if shapelist[self.island]:
+            shapelist[self.island].check_life()
+        else:
+            self.check_life()
+        screenshot.update()
+        screenshot.create_image()
+        
+        
+        
+        #check spaces around it if its empty then add breath
+        #if opposite collor
+        # then check its breathes if its the same color group into shape
+        # if it encouters a stone adjancent it auto loses a life        
 
     # this  function reverts a stone to an empty space
     def destroy(self):
-        print "e"
+        del self.checked_shapes[:]
+        for place in self.adjacent_places:
+            piece = game.places[place[0]][place[1]]
+            if piece:
+                piece.life = piece.life + 1
+                if shapelist[piece.island] and (piece.island not in self.checked_shapes):
+                    shapelist[piece.island].shape_life = shapelist[piece.island].shape_life + 1
+                    self.checked_shapes.append(piece.island)
+        if self.color == "W":
+            black.capture = black.capture + 1
+            black.bumper.itemconfig(black.captured, text=black.capture)
+        else:
+            white.capture = white.capture + 1
+            white.bumper.itemconfig(white.captured, text=white.capture)
+        go.board.itemconfig(go.intersect[self.x][self.y], fill="")
+        game.places[self.x][self.y] = None
+        # add a life to the shape around it 
 
 
 # a datatype for groups of adjacent stones that are the same color, therefore sharing breaths; by Ben
-class Shape:
+class Shape(Stone): 
 
     def __init__(self):
-        print "e"
+        self.stones = []
+        self.shape_life = 0
+        self.empty_pieces = []
+        # creates list
+        
+        
+            
+    def add_stone(self, stone):
+        self.stones.append(stone)
+        if stone.color != "Y":
+            stone.give_life()
+        # adds to list
 
+    def check_life(self):
+        print self.shape_life
+        if self.shape_life == 0:
+            self.destroy_shape()
+            
+        # goes through list and runs life on each stone
+
+    def destroy_shape(self):
+        for parts in self.stones:
+            parts.destroy()
+
+        
 
 # a datatype for enforcing the ko rule
 class Gamestate:
-
     def __init__(self):
-        print "e"
+        self.preimage = []
+        self.image = []
+        for j in range (81):
+            self.preimage.append("T")
+    def create_image(self):
+        self.image = []
+        for y in range(9):
+            for x in range(9):
+                if game.places[x][y]:
+                    self.image.append(game.places[x][y].color)
+                else:
+                    self.image.append("T")
+    def update(self):
+        self.preimage = self.image
+
+    
 
 
 mainmenu()
